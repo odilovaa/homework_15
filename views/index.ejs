@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Group Chats</h1>
+
+    <form id="join">
+        <label for="form">For Created Groups:</label><br>
+        <input type="text" name="" id="name"/>
+        <input type="text" name="" id="message"/>
+        <select id="select"></select>
+        <input type="submit" value="Join"/>
+    </form>
+
+    <hr>
+
+    <form id="create">
+        <label for="form">For Create Groups:</label><br>
+        <input type="text" name="" id="groupName" placeholder="group" required/>
+        <input type="text" name="" id="authorName" placeholder="author" required/>
+        <input type="submit" value="Create"/>
+    </form>
+
+    <hr>
+
+    <form id="fileForm">
+        <input type="file" name="photo" id=""/>
+        <input type="submit" value="submit"/>
+    </form>
+
+    <hr>
+    <div></div>
+
+</body>
+
+<script type="module">
+    import {io} from "https://cdn.socket.io/4.3.2/socket.io.esm.min.js";
+
+    const socket = io()
+
+    const createForm = document.getElementById("create");
+    const joinForm = document.getElementById("join");
+    const groupName = document.getElementById("groupName");
+    const authorName = document.getElementById("authorName");
+    const select = document.getElementById("select");
+    const name = document.getElementById("name");
+    const message = document.getElementById("message");
+    const fileForm = document.getElementById("fileForm");
+    const div = document.querySelector("div");
+
+    createForm.addEventListener("submit", (e) =>
+    {
+        e.preventDefault();
+        
+        socket.emit("groupName", {name: groupName.value, author: authorName.value});
+
+        groupName.value = "";
+        authorName.value = "";
+    })
+
+    socket.on("groups", ({groups}) =>
+    {
+        select.innerHTML = ""
+        groups.forEach((group) => 
+        {
+            const option = document.createElement("option")
+
+            option.textContent = group.name;
+            option.value = group.name;
+
+            select.append(option)
+        })
+    })
+
+    joinForm.addEventListener("submit", (e) =>
+    {
+        e.preventDefault();
+
+        socket.emit("joinGroup", {name: name.value, group: select.value, message: message.value})
+
+        name.value = "";
+    })
+
+    socket.on("file", (data) =>
+    {
+        div.innerHTML = "";
+        data.data.files.forEach((file) =>
+        {
+            const img = document.createElement("img");
+
+            img.setAttribute("src", `/${file}`)
+            div.append(img)
+        })
+    })
+
+
+
+
+</script>
+</html>
